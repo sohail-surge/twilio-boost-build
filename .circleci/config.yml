@@ -1,0 +1,73 @@
+version: 2.0
+
+aliases:
+  - &workdir
+    working_directory: ~/twilio-boost-build
+  - &operations
+    steps:
+      - checkout
+      - restore_cache:
+          key: boost-tarball-$BOOST_VERSION-$TWILIO_SUFFIX
+      - run: ./boost.sh -$PLATFORM --no-framework --boost-version $BOOST_VERSION --twilio-suffix $TWILIO_SUFFIX
+      - save_cache:
+          key: boost-tarball-$BOOST_VERSION-$TWILIO_SUFFIX
+          paths:
+            - src
+
+  - &darwin-defaults
+    <<: *workdir
+    <<: *operations
+    macos:
+      xcode: "9.2.0"
+  - &ios-defaults
+    <<: *workdir
+    <<: *operations
+    macos:
+      xcode: "9.2.0"
+  - &linux-defaults
+    <<: *workdir
+    <<: *operations
+    docker:
+      - image: berkus/docker-android-ci:latest
+    resource_class: xlarge
+  - &android-defaults
+    <<: *workdir
+    <<: *operations
+    docker:
+      - image: berkus/docker-android-ci:latest
+    resource_class: xlarge
+
+jobs:
+  # Darwin Builds
+  build_darwin:
+    <<: *darwin-defaults
+    environment:
+      - PLATFORM=osx
+  # Android Builds
+  build_android:
+    <<: *android-defaults
+    environment:
+      - PLATFORM=android
+  # Linux Builds
+  build_linux:
+    <<: *linux-defaults
+    environment:
+      - PLATFORM=linux
+  # iOS Builds
+  build_ios:
+    <<: *ios-defaults
+    environment:
+      - PLATFORM=ios
+
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_darwin
+        context: rtd-cpp-boost-lib
+      - build_ios
+        context: rtd-cpp-boost-lib
+      - build_linux
+        context: rtd-cpp-boost-lib
+      - build_android
+        context: rtd-cpp-boost-lib
