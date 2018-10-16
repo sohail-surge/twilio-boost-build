@@ -63,11 +63,11 @@ workflows:
   version: 2
   build_and_deploy:
     jobs:
-      - build_darwin
-        context: rtd-cpp-boost-lib
-      - build_ios
-        context: rtd-cpp-boost-lib
-      - build_linux
-        context: rtd-cpp-boost-lib
-      - build_android
-        context: rtd-cpp-boost-lib
+      - build_darwin:
+          context: rtd-cpp-boost-lib
+      - build_ios:
+          context: rtd-cpp-boost-lib
+      - build_linux:
+          context: rtd-cpp-boost-lib
+      - build_android:
+          context: rtd-cpp-boost-lib
