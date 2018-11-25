@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #===============================================================================
 # Filename:  boost.sh
 # Author:    Pete Goodliffe
@@ -909,18 +909,18 @@ buildBoost_Linux()
         if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
     done
 
-    for VARIANT in debug release; do
-        echo Building $VARIANT 32-bit Boost for Linux
-        ./b2 $THREADS --build-dir=linux-build --stagedir=linux-build/stage toolset=gcc \
-            --prefix="$OUTPUT_DIR" \
-            --libdir="$LINUXOUTPUTDIR/lib/$VARIANT/x86" \
-            address-model=32 variant=$VARIANT \
-            optimization=speed \
-            cxxflags="${CXX_FLAGS} ${CPPSTD}" \
-            link=static threading=multi \
-            install >> "${LINUXOUTPUTDIR}/linux-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
-    done
+    # for VARIANT in debug release; do
+    #     echo Building $VARIANT 32-bit Boost for Linux
+    #     ./b2 $THREADS --build-dir=linux-build --stagedir=linux-build/stage toolset=gcc \
+    #         --prefix="$OUTPUT_DIR" \
+    #         --libdir="$LINUXOUTPUTDIR/lib/$VARIANT/x86" \
+    #         address-model=32 variant=$VARIANT \
+    #         optimization=speed \
+    #         cxxflags="${CXX_FLAGS} ${CPPSTD}" \
+    #         link=static threading=multi \
+    #         install >> "${LINUXOUTPUTDIR}/linux-build.log" 2>&1
+    #     if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
+    # done
 
     doneSection
 }
@@ -1519,6 +1519,6 @@ fi
 packageLibs
 
 # deployToNexus
-deployToBintray
+# deployToBintray
 
 echo "Completed successfully"
