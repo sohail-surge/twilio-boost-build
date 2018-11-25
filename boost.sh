@@ -834,7 +834,8 @@ buildBoost_Linux()
             --layout=tagged \
             address-model=64 variant=$VARIANT \
             optimization=speed \
-            cxxflags="${CXX_FLAGS} ${CPPSTD}" \
+            cflags="-fPIC" \
+            cxxflags="${CXX_FLAGS} ${CPPSTD} -fPIC" \
             link=static threading=multi \
             install >> "${LINUXOUTPUTDIR}/linux-build.log" 2>&1
         if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
