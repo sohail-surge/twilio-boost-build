@@ -777,19 +777,6 @@ buildBoost_iOS()
         link=static define=_LITTLE_ENDIAN"
 
     for VARIANT in debug release; do
-        echo Building $VARIANT 32-bit Boost for iPhone
-
-        ./b2 $THREADS \
-            --prefix="$OUTPUT_DIR" \
-            toolset=darwin-${IOS_SDK_VERSION}~iphone \
-            variant=$VARIANT address-model=32 architecture=arm optimization=space \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
-            macosx-version=iphone-${IOS_SDK_VERSION} \
-            $IOS_SHARED_FLAGS install >> "${IOSOUTPUTDIR}/iphone-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging iPhone. Check ${IOSOUTPUTDIR}/iphone-build.log"; exit 1; fi
-    done
-
-    for VARIANT in debug release; do
         echo Building $VARIANT 64-bit Boost for iPhone
 
         ./b2 $THREADS \
@@ -804,19 +791,19 @@ buildBoost_iOS()
 
     doneSection
 
-    for VARIANT in debug release; do
-        echo Building $VARIANT fat Boost for iPhoneSimulator
+    # for VARIANT in debug release; do
+    #     echo Building $VARIANT fat Boost for iPhoneSimulator
 
-        ./b2 $THREADS \
-            --prefix="$OUTPUT_DIR" \
-            toolset=darwin-${IOS_SDK_VERSION}~iphonesim \
-            variant=$VARIANT abi=sysv address-model=32_64 architecture=x86 binary-format=mach-o \
-            target-os=iphone architecture=x86 threading=multi optimization=speed link=static \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
-            macosx-version=iphonesim-${IOS_SDK_VERSION} \
-            install >> "${IOSOUTPUTDIR}/iphone-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging iPhoneSimulator. Check ${IOSOUTPUTDIR}/iphone-build.log"; exit 1; fi
-    done
+    #     ./b2 $THREADS \
+    #         --prefix="$OUTPUT_DIR" \
+    #         toolset=darwin-${IOS_SDK_VERSION}~iphonesim \
+    #         variant=$VARIANT abi=sysv address-model=32_64 architecture=x86 binary-format=mach-o \
+    #         target-os=iphone architecture=x86 threading=multi optimization=speed link=static \
+    #         cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
+    #         macosx-version=iphonesim-${IOS_SDK_VERSION} \
+    #         install >> "${IOSOUTPUTDIR}/iphone-build.log" 2>&1
+    #     if [ $? != 0 ]; then echo "Error staging iPhoneSimulator. Check ${IOSOUTPUTDIR}/iphone-build.log"; exit 1; fi
+    # done
 
     doneSection
 }
