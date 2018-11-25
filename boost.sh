@@ -29,7 +29,7 @@
 #===============================================================================
 
 ALL_BOOST_LIBS="atomic chrono container context coroutine date_time exception filesystem graph graph_parallel iostreams locale log math mpi program_options python random regex serialization signals system test thread timer type_erasure wave"
-BOOST_LIBS="atomic container context coroutine date_time exception iostreams program_options random regex serialization system test thread"
+BOOST_LIBS=${BOOST_LIBS:-${ALL_BOOST_LIBS}}
 
 BUILD_ANDROID=
 BUILD_IOS=
@@ -42,8 +42,8 @@ CLEAN=
 NO_CLEAN=
 NO_FRAMEWORK=
 
-BOOST_VERSION=1.67.0
-BOOST_VERSION2=1_67_0
+BOOST_VERSION=${BOOST_VERSION:-1.67.0}
+BOOST_VERSION2=${BOOST_VERSION//\./_}
 
 ASYNC_COMMIT=0a35ece14492863980dababcdd3aa1d0fffd05f2
 
