@@ -779,9 +779,8 @@ buildBoost_iOS()
     for VARIANT in debug release; do
         echo Building $VARIANT 32-bit Boost for iPhone
 
-        ./b2 $THREADS --build-dir=iphone-build --stagedir=iphone-build/stage \
+        ./b2 $THREADS \
             --prefix="$OUTPUT_DIR" \
-            --libdir="$IOSOUTPUTDIR/lib/$VARIANT/armeabi-v7a" \
             toolset=darwin-${IOS_SDK_VERSION}~iphone \
             variant=$VARIANT address-model=32 architecture=arm optimization=space \
             cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
@@ -793,9 +792,8 @@ buildBoost_iOS()
     for VARIANT in debug release; do
         echo Building $VARIANT 64-bit Boost for iPhone
 
-        ./b2 $THREADS --build-dir=iphone-build --stagedir=iphone-build/stage \
+        ./b2 $THREADS \
             --prefix="$OUTPUT_DIR" \
-            --libdir="$IOSOUTPUTDIR/lib/$VARIANT/arm64-v8a" \
             toolset=darwin-${IOS_SDK_VERSION}~iphone \
             variant=$VARIANT address-model=64 architecture=arm optimization=space \
             cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
@@ -809,9 +807,8 @@ buildBoost_iOS()
     for VARIANT in debug release; do
         echo Building $VARIANT fat Boost for iPhoneSimulator
 
-        ./b2 $THREADS --build-dir=iphonesim-build --stagedir=iphonesim-build/stage \
+        ./b2 $THREADS \
             --prefix="$OUTPUT_DIR" \
-            --libdir="$IOSOUTPUTDIR/lib/$VARIANT/fat-x86" \
             toolset=darwin-${IOS_SDK_VERSION}~iphonesim \
             variant=$VARIANT abi=sysv address-model=32_64 architecture=x86 binary-format=mach-o \
             target-os=iphone architecture=x86 threading=multi optimization=speed link=static \
@@ -824,72 +821,6 @@ buildBoost_iOS()
     doneSection
 }
 
-#===============================================================================
-
-buildBoost_tvOS()
-{
-    cd "$BOOST_SRC"
-    mkdir -p $TVOSOUTPUTDIR
-    echo > ${TVOSOUTPUTDIR}/tvos-build.log
-
-    for VARIANT in debug release; do
-        echo Building $VARIANT fat Boost for AppleTV
-        ./b2 $THREADS --build-dir=appletv-build --stagedir=appletv-build/stage \
-            --prefix="$OUTPUT_DIR" \
-            --libdir="$TVOSOUTPUTDIR/lib/$VARIANT/fat-arm" \
-            address-model=32_64 variant=$VARIANT toolset=darwin-${TVOS_SDK_VERSION}~appletv \
-            optimization=space \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
-            architecture=arm target-os=iphone define=_LITTLE_ENDIAN \
-            link=static threading=multi install >> "${TVOSOUTPUTDIR}/tvos-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging AppleTV. Check ${TVOSOUTPUTDIR}/tvos-build.log"; exit 1; fi
-    done
-
-    doneSection
-
-    for VARIANT in debug release; do
-        echo Building $VARIANT fat Boost for AppleTVSimulator
-        ./b2 $THREADS --build-dir=appletv-build --stagedir=appletvsim-build/stage \
-            --prefix="$OUTPUT_DIR" \
-            --libdir="$TVOSOUTPUTDIR/lib/$VARIANT/fat-x86" \
-            abi=sysv address-model=32_64 architecture=x86 binary-format=mach-o threading=multi \
-            optimization=speed \
-            variant=$VARIANT \
-            toolset=darwin-${TVOS_SDK_VERSION}~appletvsim \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" target-os=iphone \
-            link=static install >> "${TVOSOUTPUTDIR}/tvos-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging AppleTVSimulator. Check ${TVOSOUTPUTDIR}/tvos-build.log"; exit 1; fi
-    done
-
-    doneSection
-}
-
-#===============================================================================
-
-buildBoost_OSX()
-{
-    cd "$BOOST_SRC"
-    mkdir -p $OSXOUTPUTDIR
-    echo > ${OSXOUTPUTDIR}/osx-build.log
-
-    for VARIANT in debug release; do
-        echo Building $VARIANT 64-bit Boost for OSX
-        ./b2 $THREADS --build-dir=osx-build --stagedir=osx-build/stage toolset=clang \
-            --prefix="$OUTPUT_DIR" \
-            --libdir="$OSXOUTPUTDIR/lib/$VARIANT/x86_64" \
-            address-model=64 variant=$VARIANT \
-            optimization=speed \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++ ${OSX_ARCH_FLAGS}" \
-            linkflags="-stdlib=libc++" link=static threading=multi \
-            macosx-version=${OSX_SDK_VERSION} install >> "${OSXOUTPUTDIR}/osx-build.log" 2>&1
-        if [ $? != 0 ]; then echo "Error staging OSX. Check ${OSXOUTPUTDIR}/osx-build.log"; exit 1; fi
-    done
-
-    doneSection
-}
-
-#===============================================================================
-
 buildBoost_Linux()
 {
     cd "$BOOST_SRC"
@@ -898,9 +829,9 @@ buildBoost_Linux()
 
     for VARIANT in debug release; do
         echo Building $VARIANT 64-bit Boost for Linux
-        ./b2 $THREADS --build-dir=linux-build --stagedir=linux-build/stage toolset=clang \
+        ./b2 $THREADS toolset=clang \
             --prefix="$OUTPUT_DIR" \
-            --libdir="$LINUXOUTPUTDIR/lib/$VARIANT/x86_64" \
+            --layout=tagged \
             address-model=64 variant=$VARIANT \
             optimization=speed \
             cxxflags="${CXX_FLAGS} ${CPPSTD}" \
@@ -909,376 +840,9 @@ buildBoost_Linux()
         if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
     done
 
-    # for VARIANT in debug release; do
-    #     echo Building $VARIANT 32-bit Boost for Linux
-    #     ./b2 $THREADS --build-dir=linux-build --stagedir=linux-build/stage toolset=gcc \
-    #         --prefix="$OUTPUT_DIR" \
-    #         --libdir="$LINUXOUTPUTDIR/lib/$VARIANT/x86" \
-    #         address-model=32 variant=$VARIANT \
-    #         optimization=speed \
-    #         cxxflags="${CXX_FLAGS} ${CPPSTD}" \
-    #         link=static threading=multi \
-    #         install >> "${LINUXOUTPUTDIR}/linux-build.log" 2>&1
-    #     if [ $? != 0 ]; then echo "Error staging Linux. Check ${LINUXOUTPUTDIR}/linux-build.log"; exit 1; fi
-    # done
-
     doneSection
 }
 
-#===============================================================================
-
-packageHeaders()
-{
-    BUILDDIR="$CURRENT_DIR/target/distributions"
-    mkdir -p "${BUILDDIR}"
-    mkdir -p "${OUTPUT_DIR}/include/boost/"
-
-    echo Packaging Boost and Asynchronous headers together
-
-    cp -rf $SRCDIR/boost/$BOOST_VERSION/boost/* $OUTPUT_DIR/include/boost/ || exit 1
-    cp -rf $ASYNC_DIR/boost/* $OUTPUT_DIR/include/boost/ || exit 1
-
-    (cd $OUTPUT_DIR; tar cvjf "$BUILDDIR/boost-headers-${BOOST_VERSION}${TWILIO_SUFFIX}-all.tar.bz2" include/boost/*)
-}
-
-#===============================================================================
-
-packageLibEntry()
-{
-    BUILDDIR="$CURRENT_DIR/target/distributions"
-    mkdir -p "${BUILDDIR}"
-
-    DIR="$1"
-    NAME="$2"
-
-    echo Packaging boost-$NAME...
-
-    if [[ -z "$3" ]]; then
-        PATTERN="-name *libboost_${NAME}*"
-    else
-        PATTERN="-name NOTMATCHED"
-        for PAT in $3; do
-            PATTERN="$PATTERN -o -name *libboost_${PAT}*"
-        done
-    fi
-
-    (cd $OUTPUT_DIR/$DIR; find lib -type f $PATTERN | tar cvjf "${BUILDDIR}/boost-${NAME}-${BOOST_VERSION}${TWILIO_SUFFIX}-${DIR}.tar.bz2" -T -)
-}
-
-packageLibSet()
-{
-    echo Packaging Boost libraries...
-    DIR=$1
-    for lib in $BOOST_LIBS; do
-        if [ "$lib" == "serialization" ]; then
-            packageLibEntry $DIR serialization "serialization wserialization"
-        elif [ "$lib" == "test" ]; then
-            packageLibEntry $DIR test "prg_exec_monitor test_exec_monitor unit_test_framework"
-        else
-            packageLibEntry $DIR $lib
-        fi
-    done
-}
-
-packageLibs()
-{
-    if [[ -n "$BUILD_ANDROID" ]]; then
-        packageLibSet "android"
-    fi
-
-    if [[ -n "$BUILD_IOS" ]]; then
-        packageLibSet "ios"
-    fi
-
-    if [[ -n "$BUILD_TVOS" ]]; then
-        packageLibSet "tvos"
-    fi
-
-    if [[ -n "$BUILD_OSX" ]]; then
-        packageLibSet "osx"
-    fi
-
-    if [[ -n "$BUILD_LINUX" ]]; then
-        packageLibSet "linux"
-    fi
-}
-
-#===============================================================================
-
-# Uses maven, but see
-# http://stackoverflow.com/questions/4029532/upload-artifacts-to-nexus-without-maven
-# for how to do it using plain curl...
-# 
-deployFile()
-{
-    ARTIFACT=$1
-    FILE=$2
-    CLASSIFIER=$3
-    VERSION=$4
-
-    mvn deploy:deploy-file \
-        $SETTINGS_FILE \
-        -Durl=$REPO_URL \
-        -DrepositoryId=$REPO_ID \
-        -DgroupId=org.boost \
-        -DartifactId=$ARTIFACT \
-        -Dclassifier=$CLASSIFIER \
-        -Dversion=$VERSION \
-        -DgeneratePom=true \
-        -Dpackaging=tar.bz2 \
-        -Dfile=$FILE || exit 1
-}
-
-deployPlat()
-{
-    PLAT=$1
-    BUILDDIR=$2
-
-    for lib in $BOOST_LIBS; do
-        deployFile boost-${lib} "${BUILDDIR}/boost-${lib}-${BOOST_VERSION}${TWILIO_SUFFIX}-${PLAT}.tar.bz2" ${PLAT} ${BOOST_VERSION}${TWILIO_SUFFIX}
-    done
-}
-
-deployToNexus()
-{
-    BUILDDIR="$CURRENT_DIR/target/distributions"
-
-    if [[ -n "$BUILD_HEADERS" ]]; then
-        deployFile boost-headers "${BUILDDIR}/boost-headers-${BOOST_VERSION}${TWILIO_SUFFIX}-all.tar.bz2" all ${BOOST_VERSION}${TWILIO_SUFFIX}
-    fi
-
-    if [[ -n "$BUILD_ANDROID" ]]; then
-        deployPlat "android" "$BUILDDIR"
-    fi
-    if [[ -n "$BUILD_IOS" ]]; then
-        deployPlat "ios" "$BUILDDIR"
-    fi
-    if [[ -n "$BUILD_OSX" ]]; then
-        deployPlat "osx" "$BUILDDIR"
-    fi
-    if [[ -n "$BUILD_LINUX" ]]; then
-        deployPlat "linux" "$BUILDDIR"
-    fi
-}
-
-deployToBintray()
-{
-    if [[ -z "$REPO_ID" ]]; then
-        abort "Specify REPO_ID to deploy"
-    fi
-
-    if [[ -z "$BINTRAY_USERNAME" || -z "$BINTRAY_PASSWORD" ]]; then
-        abort "Specify both BINTRAY_USERNAME and BINTRAY_PASSWORD to deploy to Bintray"
-    fi
-
-    BUILDDIR="$CURRENT_DIR/target/distributions"
-    SETTINGS_FILE="$CURRENT_DIR/settings.xml"
-
-    # Generate settings.xml with bintray password
-    cat <<EOF > $SETTINGS_FILE
-<?xml version='1.0' encoding='UTF-8'?>
-<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd'
-          xmlns='http://maven.apache.org/SETTINGS/1.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
-    <servers>
-        <server>
-            <id>$REPO_ID</id>
-            <username>${BINTRAY_USERNAME}</username>
-            <password>${BINTRAY_PASSWORD}</password>
-        </server>
-    </servers>
-</settings>
-EOF
-
-    SETTINGS_FILE="-s $SETTINGS_FILE"
-
-    deployToNexus
-}
-
-#===============================================================================
-
-unpackArchive()
-{
-    BUILDDIR="$1"
-    LIBNAME="$2"
-
-    echo "Unpacking $BUILDDIR/$LIBNAME"
-
-    if [[ -d "$BUILDDIR/$LIBNAME" ]]; then 
-        cd "$BUILDDIR/$LIBNAME"
-        rm *.o
-        rm *.SYMDEF*
-    else
-        mkdir -p "$BUILDDIR/$LIBNAME"
-    fi
-
-    (
-        cd "$BUILDDIR/$NAME"; ar -x "../../libboost_$NAME.a";
-        for FILE in *.o; do
-            NEW_FILE="${NAME}_${FILE}"
-            mv "$FILE" "$NEW_FILE"
-        done
-    )
-}
-
-#===============================================================================
-
-scrunchAllLibsTogetherInOneLibPerPlatform()
-{
-    echo "Framework builds are not supported - need to fix all the paths"
-    exit 1
-
-    cd "$BOOST_SRC"
-
-    if [[ -n $BUILD_IOS ]]; then
-        # iOS Device
-        mkdir -p "$IOSBUILDDIR/armv7/obj"
-        mkdir -p "$IOSBUILDDIR/arm64/obj"
-
-        # iOS Simulator
-        mkdir -p "$IOSBUILDDIR/i386/obj"
-        mkdir -p "$IOSBUILDDIR/x86_64/obj"
-    fi
-
-    if [[ -n $BUILD_TVOS ]]; then
-        # tvOS Device
-        mkdir -p "$TVOSBUILDDIR/arm64/obj"
-
-        # tvOS Simulator
-        mkdir -p "$TVOSBUILDDIR/x86_64/obj"
-    fi
-
-    if [[ -n $BUILD_OSX ]]; then
-        # OSX
-        for ARCH in $OSX_ARCHS; do
-            mkdir -p "$OSXBUILDDIR/$ARCH/obj"
-        done
-    fi
-
-    ALL_LIBS=""
-
-    echo Splitting all existing fat binaries...
-
-    for NAME in $BOOST_LIBS; do
-        if [ "$NAME" == "test" ]; then
-            NAME="unit_test_framework"
-        fi
-
-        ALL_LIBS="$ALL_LIBS libboost_$NAME.a"
-
-        if [[ -n $BUILD_IOS ]]; then
-            $IOS_ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" \
-                -thin armv7 -o "$IOSBUILDDIR/armv7/libboost_$NAME.a"
-            $IOS_ARM_DEV_CMD lipo "iphone-build/stage/lib/libboost_$NAME.a" \
-                -thin arm64 -o "$IOSBUILDDIR/arm64/libboost_$NAME.a"
-
-            $IOS_SIM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" \
-                -thin i386 -o "$IOSBUILDDIR/i386/libboost_$NAME.a"
-            $IOS_SIM_DEV_CMD lipo "iphonesim-build/stage/lib/libboost_$NAME.a" \
-                -thin x86_64 -o "$IOSBUILDDIR/x86_64/libboost_$NAME.a"
-        fi
-
-        if [[ -n $BUILD_TVOS ]]; then
-            $TVOS_ARM_DEV_CMD lipo "appletv-build/stage/lib/libboost_$NAME.a" \
-                -thin arm64 -o "$TVOSBUILDDIR/arm64/libboost_$NAME.a"
-
-            $TVOS_SIM_DEV_CMD lipo "appletvsim-build/stage/lib/libboost_$NAME.a" \
-                -thin x86_64 -o "$TVOSBUILDDIR/x86_64/libboost_$NAME.a"
-        fi
-
-        if [[ -n $BUILD_OSX ]]; then
-            if (( $OSX_ARCH_COUNT == 1 )); then
-                cp "osx-build/stage/lib/libboost_$NAME.a" \
-                    "$OSXBUILDDIR/$ARCH/libboost_$NAME.a"
-            else
-                for ARCH in $OSX_ARCHS; do
-                    $OSX_DEV_CMD lipo "osx-build/stage/lib/libboost_$NAME.a" \
-                        -thin $ARCH -o "$OSXBUILDDIR/$ARCH/libboost_$NAME.a"
-                done
-            fi
-        fi
-    done
-
-    echo "Decomposing each architecture's .a files"
-
-    for NAME in $BOOST_LIBS; do
-        if [ "$NAME" == "test" ]; then
-            NAME="unit_test_framework"
-        fi
-
-        echo "Decomposing libboost_${NAME}.a"
-        if [[ -n $BUILD_IOS ]]; then
-            unpackArchive "$IOSBUILDDIR/armv7/obj" $NAME
-            unpackArchive "$IOSBUILDDIR/arm64/obj" $NAME
-            unpackArchive "$IOSBUILDDIR/i386/obj" $NAME
-            unpackArchive "$IOSBUILDDIR/x86_64/obj" $NAME
-        fi
-
-        if [[ -n $BUILD_TVOS ]]; then
-            unpackArchive "$TVOSBUILDDIR/arm64/obj" $NAME
-            unpackArchive "$TVOSBUILDDIR/x86_64/obj" $NAME
-        fi
-
-        if [[ -n $BUILD_OSX ]]; then
-            for ARCH in $OSX_ARCHS; do
-                unpackArchive "$OSXBUILDDIR/$ARCH/obj" $NAME
-            done
-        fi
-    done
-
-    echo "Linking each architecture into an uberlib ($ALL_LIBS => libboost.a )"
-    if [[ -n $BUILD_IOS ]]; then
-        cd "$IOSBUILDDIR"
-        rm */libboost.a
-    fi
-    if [[ -n $BUILD_TVOS ]]; then
-        cd "$TVOSBUILDDIR"
-        rm */libboost.a
-    fi
-    if [[ -n $BUILD_OSX ]]; then
-        for ARCH in $OSX_ARCHS; do
-            rm "$OSXBUILDDIR/$ARCH/libboost.a"
-        done
-    fi
-
-    for NAME in $BOOST_LIBS; do
-        if [ "$NAME" == "test" ]; then
-            NAME="unit_test_framework"
-        fi
-
-        echo "Archiving $NAME"
-
-        # The obj/$NAME/*.o below should all be quoted, but I couldn't figure out how to do that elegantly.
-        # Boost lib names probably won't contain non-word characters any time soon, though. ;) - Jan
-
-        if [[ -n $BUILD_IOS ]]; then
-            echo ...armv7
-            (cd "$IOSBUILDDIR/armv7"; $IOS_ARM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-            echo ...arm64
-            (cd "$IOSBUILDDIR/arm64"; $IOS_ARM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-
-            echo ...i386
-            (cd "$IOSBUILDDIR/i386";  $IOS_SIM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-            echo ...x86_64
-            (cd "$IOSBUILDDIR/x86_64";  $IOS_SIM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-        fi
-
-        if [[ -n $BUILD_TVOS ]]; then
-            echo ...tvOS-arm64
-            (cd "$TVOSBUILDDIR/arm64"; $TVOS_ARM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-            echo ...tvOS-x86_64
-            (cd "$TVOSBUILDDIR/x86_64";  $TVOS_SIM_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-        fi
-
-        if [[ -n $BUILD_OSX ]]; then
-            for ARCH in $OSX_ARCHS; do
-                echo ...osx-$ARCH
-                (cd "$OSXBUILDDIR/$ARCH";  $OSX_DEV_CMD ar crus libboost.a obj/$NAME/*.o; )
-            done
-        fi
-    done
-}
-
-#===============================================================================
 
 buildFramework()
 {
@@ -1408,12 +972,12 @@ EXTRA_LINUX_FLAGS="$EXTRA_FLAGS"
 
 BOOST_TARBALL="$CURRENT_DIR/src/boost_$BOOST_VERSION2.tar.bz2"
 BOOST_SRC="$SRCDIR/boost/${BOOST_VERSION}"
-OUTPUT_DIR="$CURRENT_DIR/target/outputs/boost/$BOOST_VERSION"
-IOSOUTPUTDIR="$OUTPUT_DIR/ios"
+OUTPUT_DIR=${OUTPUT_DIR:-"$CURRENT_DIR/target/outputs/boost/$BOOST_VERSION"}
+IOSOUTPUTDIR="$OUTPUT_DIR"
 TVOSOUTPUTDIR="$OUTPUT_DIR/tvos"
 OSXOUTPUTDIR="$OUTPUT_DIR/osx"
 ANDROIDOUTPUTDIR="$OUTPUT_DIR/android"
-LINUXOUTPUTDIR="$OUTPUT_DIR/linux"
+LINUXOUTPUTDIR="$OUTPUT_DIR"
 IOSBUILDDIR="$IOSOUTPUTDIR/build"
 TVOSBUILDDIR="$TVOSOUTPUTDIR/build"
 OSXBUILDDIR="$OSXOUTPUTDIR/build"
@@ -1513,10 +1077,10 @@ if [ -z $NO_FRAMEWORK ]; then
     fi
 fi
 
-if [[ -n "$BUILD_HEADERS" ]]; then
-    packageHeaders
-fi
-packageLibs
+# if [[ -n "$BUILD_HEADERS" ]]; then
+#     packageHeaders
+# fi
+# packageLibs
 
 # deployToNexus
 # deployToBintray
