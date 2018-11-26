@@ -782,8 +782,8 @@ buildBoost_iOS()
         ./b2 $THREADS \
             --prefix="$OUTPUT_DIR" \
             toolset=darwin-${IOS_SDK_VERSION}~iphone \
-            variant=$VARIANT address-model=64 architecture=arm optimization=space \
-            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" linkflags="-stdlib=libc++" \
+            variant=$VARIANT address-model=32_64 architecture=combined optimization=space \
+            cxxflags="${CXX_FLAGS} ${CPPSTD} -stdlib=libc++" link="static" linkflags="-stdlib=libc++" \
             macosx-version=iphone-${IOS_SDK_VERSION} \
             $IOS_SHARED_FLAGS install >> "${IOSOUTPUTDIR}/iphone-build.log" 2>&1
         if [ $? != 0 ]; then echo "Error staging iPhone. Check ${IOSOUTPUTDIR}/iphone-build.log"; exit 1; fi
